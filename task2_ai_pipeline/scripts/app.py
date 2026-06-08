@@ -14,12 +14,14 @@ Without ANTHROPIC_API_KEY it runs in dry-run (returns a canned sample model).
 """
 
 import os
+from pathlib import Path
 from flask import Flask, request, render_template_string
 
-from generate_model import generate
+from generate_model import generate, has_api_key, ROOT
 
 app = Flask(__name__)
-DRY = not os.environ.get("ANTHROPIC_API_KEY")
+DRY = not has_api_key()
+GEN_DIR = ROOT / "generated"   # staging area for drafts, ready for review/PR
 
 PAGE = """
 <!doctype html><title>New Gold Model</title>
@@ -48,6 +50,7 @@ PAGE = """
      {% for i in result.review.issues %}<li>[{{ i.severity }}] {{ i.check }}: {{ i.message }}</li>{% endfor %}
    </ul>{% endif %}
    {% if result.status == 'ok' %}
+     {% if saved %}<p class="banner">Saved to <code>{{ saved }}</code></p>{% endif %}
      <h3>SQL</h3><pre>{{ result.sql }}</pre>
      <h3>YAML</h3><pre>{{ result.yml }}</pre>
    {% else %}<p>Rejected after retries - not written.</p>{% endif %}
@@ -58,12 +61,19 @@ PAGE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    result, text = None, ""
+    result, text, saved = None, "", None
     if request.method == "POST":
         text = request.form.get("request", "")
         if text.strip():
             result = generate(text, dry_run=DRY)
-    return render_template_string(PAGE, result=result, request_text=text, dry=DRY)
+            # On a passing model, write the draft into the project's staging folder.
+            if result.get("status") == "ok":
+                GEN_DIR.mkdir(parents=True, exist_ok=True)
+                name = result["name"]
+                (GEN_DIR / f"{name}.sql").write_text(result["sql"] + "\n")
+                (GEN_DIR / f"{name}.yml").write_text(result["yml"] + "\n")
+                saved = f"generated/{name}.sql + generated/{name}.yml"
+    return render_template_string(PAGE, result=result, request_text=text, dry=DRY, saved=saved)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
-anthropic>=0.39.0
 PyYAML>=6.0
 pytest>=7.0
 flask>=3.0
+# Install ONE provider SDK for live generation (skip both for --dry-run):
+anthropic>=0.39.0        # if using ANTHROPIC_API_KEY
+google-genai>=1.0        # if using GEMINI_API_KEY

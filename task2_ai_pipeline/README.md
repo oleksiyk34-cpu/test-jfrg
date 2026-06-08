@@ -58,20 +58,32 @@ task2_ai_pipeline/
 
 ## Run it
 
+Install once:
+
 ```bash
 cd task2_ai_pipeline
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...        # only needed for live generation
-python scripts/generate_model.py --request examples/request.txt --out examples/
 ```
 
-Without an API key the script runs in `--dry-run` mode using a canned model
-response, so the pipeline (and the review stage) can be demoed offline.
+**No API key?** The pipeline runs in dry-run mode and returns a sample model, so
+you can try the whole flow (including the review step) offline.
 
-Or use the web form (intake stage):
+**For real generation**, set one key. Gemini (has a free tier) is the default:
 
 ```bash
-python scripts/app.py            # open http://127.0.0.1:5000
+export GEMINI_API_KEY=...        # uses Gemini  (default if set)
+# or, instead:
+export ANTHROPIC_API_KEY=...     # uses Claude
+```
+
+The pipeline picks Gemini if its key is set, otherwise Claude. To change the model:
+`export GEMINI_MODEL=gemini-2.5-pro` (or `ANTHROPIC_MODEL=...`).
+
+Then run it one of two ways — the command line, or the web form:
+
+```bash
+python scripts/generate_model.py --request examples/request.txt --out examples/
+python scripts/app.py            # web form at http://127.0.0.1:5000
 ```
 
 ## What is built vs stubbed

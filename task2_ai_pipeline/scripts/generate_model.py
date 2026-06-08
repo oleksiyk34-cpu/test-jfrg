@@ -30,8 +30,14 @@ from reviewer import ConventionChecker
 ROOT = Path(__file__).resolve().parents[1]
 CTX = ROOT / "context"
 AGENTS = ROOT / "agents"
-MODEL = "claude-sonnet-4-6"
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 MAX_RETRIES = 2
+
+
+def has_api_key() -> bool:
+    """True if any supported provider key is set."""
+    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("GEMINI_API_KEY"))
 
 
 # --------------------------------------------------------------------------- #
@@ -51,13 +57,33 @@ def build_prompt(request: str) -> tuple[str, str]:
 # The generation LLM call (live) and an offline canned fallback.
 # --------------------------------------------------------------------------- #
 def call_llm(system: str, user: str) -> str:
-    import anthropic  # imported lazily so --dry-run and tests need no SDK
+    """Provider-agnostic: uses Gemini if GEMINI_API_KEY is set, else Anthropic.
+    SDKs are imported lazily so --dry-run and the tests need no SDK installed."""
+    if os.environ.get("GEMINI_API_KEY"):
+        return _call_gemini(system, user)
+    return _call_anthropic(system, user)
+
+
+def _call_anthropic(system: str, user: str) -> str:
+    import anthropic
     client = anthropic.Anthropic()
     resp = client.messages.create(
-        model=MODEL, max_tokens=2000, system=system,
+        model=ANTHROPIC_MODEL, max_tokens=2000, system=system,
         messages=[{"role": "user", "content": user}],
     )
     return resp.content[0].text
+
+
+def _call_gemini(system: str, user: str) -> str:
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    resp = client.models.generate_content(
+        model=GEMINI_MODEL,
+        config=types.GenerateContentConfig(system_instruction=system),
+        contents=user,
+    )
+    return resp.text
 
 
 CANNED_RESPONSE = """MODEL_NAME: agg_repository_downloads_daily
@@ -188,9 +214,9 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="Use the canned model (no API key).")
     args = ap.parse_args()
 
-    dry = args.dry_run or not os.environ.get("ANTHROPIC_API_KEY")
+    dry = args.dry_run or not has_api_key()
     if dry and not args.dry_run:
-        print("! No ANTHROPIC_API_KEY found - running in --dry-run mode.\n")
+        print("! No ANTHROPIC_API_KEY or GEMINI_API_KEY found - running in --dry-run mode.\n")
 
     request = Path(args.request).read_text()
     print(f">> Intake request:\n{request.strip()}\n")
