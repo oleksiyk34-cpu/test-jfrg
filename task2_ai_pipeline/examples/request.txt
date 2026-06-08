@@ -1,0 +1,3 @@
+Daily download counts and bytes downloaded per repository, split by whether the
+downloader is a human or a CI bot. I want to see traffic trends per repo over time
+and tell automated pulls apart from people.

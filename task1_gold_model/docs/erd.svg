@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 900" font-family="Helvetica,Arial">
+<rect x="0" y="0" width="850" height="900" fill="#ffffff"/>
+<text x="40" y="34" font-size="20" font-weight="700" fill="#111827">JFrog Artifactory - Gold Layer ERD</text>
+<text x="40" y="52" font-size="12" fill="#6b7280">Facts = Snowplow events. Dimensions = Airbyte entities. Facts are wide (common attributes denormalized on).</text>
+<rect x="560" y="22" width="12" height="12" rx="2" fill="#2563eb"/><text x="577" y="32" font-size="11" fill="#374151">Fact</text>
+<rect x="655" y="22" width="12" height="12" rx="2" fill="#7c3aed"/><text x="672" y="32" font-size="11" fill="#374151">Aggregate</text>
+<rect x="750" y="22" width="12" height="12" rx="2" fill="#059669"/><text x="767" y="32" font-size="11" fill="#374151">Dimension</text>
+<path d="M 290 119.0 C 415.0 119.0, 415.0 164.0, 540 164.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="119.0" r="3" fill="#94a3b8"/><circle cx="540" cy="164.0" r="3" fill="#94a3b8"/>
+<path d="M 290 119.0 C 415.0 119.0, 415.0 392.0, 540 392.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="119.0" r="3" fill="#94a3b8"/><circle cx="540" cy="392.0" r="3" fill="#94a3b8"/>
+<path d="M 290 119.0 C 415.0 119.0, 415.0 602.0, 540 602.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="119.0" r="3" fill="#94a3b8"/><circle cx="540" cy="602.0" r="3" fill="#94a3b8"/>
+<path d="M 290 119.0 C 415.0 119.0, 415.0 801.0, 540 801.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="119.0" r="3" fill="#94a3b8"/><circle cx="540" cy="801.0" r="3" fill="#94a3b8"/>
+<path d="M 290 280.0 C 415.0 280.0, 415.0 164.0, 540 164.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="280.0" r="3" fill="#94a3b8"/><circle cx="540" cy="164.0" r="3" fill="#94a3b8"/>
+<path d="M 290 280.0 C 415.0 280.0, 415.0 392.0, 540 392.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="280.0" r="3" fill="#94a3b8"/><circle cx="540" cy="392.0" r="3" fill="#94a3b8"/>
+<path d="M 290 280.0 C 415.0 280.0, 415.0 602.0, 540 602.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="280.0" r="3" fill="#94a3b8"/><circle cx="540" cy="602.0" r="3" fill="#94a3b8"/>
+<path d="M 290 471.0 C 415.0 471.0, 415.0 164.0, 540 164.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="471.0" r="3" fill="#94a3b8"/><circle cx="540" cy="164.0" r="3" fill="#94a3b8"/>
+<path d="M 290 471.0 C 415.0 471.0, 415.0 392.0, 540 392.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="471.0" r="3" fill="#94a3b8"/><circle cx="540" cy="392.0" r="3" fill="#94a3b8"/>
+<path d="M 290 471.0 C 415.0 471.0, 415.0 801.0, 540 801.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="471.0" r="3" fill="#94a3b8"/><circle cx="540" cy="801.0" r="3" fill="#94a3b8"/>
+<path d="M 290 659.0 C 415.0 659.0, 415.0 164.0, 540 164.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="659.0" r="3" fill="#94a3b8"/><circle cx="540" cy="164.0" r="3" fill="#94a3b8"/>
+<path d="M 290 659.0 C 415.0 659.0, 415.0 392.0, 540 392.0" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-opacity="0.55"/><circle cx="290" cy="659.0" r="3" fill="#94a3b8"/><circle cx="540" cy="392.0" r="3" fill="#94a3b8"/>
+<g>
+<rect x="540" y="50" width="270" height="228" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="540" y="50" width="270" height="30" rx="6" fill="#2563eb"/>
+<rect x="540" y="72" width="270" height="8" fill="#2563eb"/>
+<text x="550" y="70" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">fct_download_events</text>
+<text x="550" y="95" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">download_event_id</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="540" y1="102" x2="810" y2="102" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="117" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">downloaded_at</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="124" x2="810" y2="124" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="139" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">repository_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="146" x2="810" y2="146" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="161" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">user_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="168" x2="810" y2="168" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="183" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">package_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="190" x2="810" y2="190" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="205" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">package_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="212" x2="810" y2="212" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="227" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">actor_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="234" x2="810" y2="234" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="249" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">bytes_sent</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="256" x2="810" y2="256" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="271" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">is_success</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="550" y="292" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: one row per download</text>
+</g>
+<g>
+<rect x="540" y="300" width="270" height="184" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="540" y="300" width="270" height="30" rx="6" fill="#2563eb"/>
+<rect x="540" y="322" width="270" height="8" fill="#2563eb"/>
+<text x="550" y="320" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">fct_deploy_events</text>
+<text x="550" y="345" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">deploy_event_id</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="540" y1="352" x2="810" y2="352" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="367" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">deployed_at</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="374" x2="810" y2="374" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="389" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">repository_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="396" x2="810" y2="396" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="411" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">user_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="418" x2="810" y2="418" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="433" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">package_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="440" x2="810" y2="440" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="455" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">size_bytes</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="462" x2="810" y2="462" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="477" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">sha256</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="550" y="498" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: one row per deploy</text>
+</g>
+<g>
+<rect x="540" y="510" width="270" height="184" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<rect x="540" y="510" width="270" height="30" rx="6" fill="#7c3aed"/>
+<rect x="540" y="532" width="270" height="8" fill="#7c3aed"/>
+<text x="550" y="530" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">agg_repository_daily</text>
+<text x="550" y="555" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">repository_sk</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="540" y1="562" x2="810" y2="562" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="577" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">activity_date</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="540" y1="584" x2="810" y2="584" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="599" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">download_count</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="606" x2="810" y2="606" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="621" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">deploy_count</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="628" x2="810" y2="628" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="643" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">bytes_downloaded</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="650" x2="810" y2="650" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="665" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">storage_bytes</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="672" x2="810" y2="672" stroke="#7c3aed" stroke-opacity="0.12"/>
+<text x="550" y="687" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">distinct_users</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="550" y="708" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: one row per repo per day</text>
+</g>
+<g>
+<rect x="540" y="720" width="270" height="162" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<rect x="540" y="720" width="270" height="30" rx="6" fill="#2563eb"/>
+<rect x="540" y="742" width="270" height="8" fill="#2563eb"/>
+<text x="550" y="740" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">fct_ui_interactions</text>
+<text x="550" y="765" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">ui_event_id</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="540" y1="772" x2="810" y2="772" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="787" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">event_date</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="794" x2="810" y2="794" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="809" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">user_sk</tspan><tspan fill="#6b7280" font-size="10">  [FK]</tspan></text>
+<line x1="540" y1="816" x2="810" y2="816" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="831" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">session_id</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="838" x2="810" y2="838" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="853" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">event_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="540" y1="860" x2="810" y2="860" stroke="#2563eb" stroke-opacity="0.12"/>
+<text x="550" y="875" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">page_url</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="550" y="896" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: one row per UI event</text>
+</g>
+<g>
+<rect x="40" y="60" width="250" height="118" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<rect x="40" y="60" width="250" height="30" rx="6" fill="#059669"/>
+<rect x="40" y="82" width="250" height="8" fill="#059669"/>
+<text x="50" y="80" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">dim_date</text>
+<text x="50" y="105" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">date_day</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="40" y1="112" x2="290" y2="112" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="127" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">year</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="134" x2="290" y2="134" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="149" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">month</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="156" x2="290" y2="156" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="171" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">is_weekend</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="50" y="192" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: one row per day</text>
+</g>
+<g>
+<rect x="40" y="210" width="250" height="140" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<rect x="40" y="210" width="250" height="30" rx="6" fill="#059669"/>
+<rect x="40" y="232" width="250" height="8" fill="#059669"/>
+<text x="50" y="230" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">dim_repository</text>
+<text x="50" y="255" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">repository_sk</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="40" y1="262" x2="290" y2="262" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="277" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">repo_key</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="284" x2="290" y2="284" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="299" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">package_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="306" x2="290" y2="306" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="321" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">rclass</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="328" x2="290" y2="328" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="343" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">is_current</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="50" y="364" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: SCD2 - repo version</text>
+</g>
+<g>
+<rect x="40" y="390" width="250" height="162" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<rect x="40" y="390" width="250" height="30" rx="6" fill="#059669"/>
+<rect x="40" y="412" width="250" height="8" fill="#059669"/>
+<text x="50" y="410" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">dim_user</text>
+<text x="50" y="435" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">user_sk</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="40" y1="442" x2="290" y2="442" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="457" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">user_name</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="464" x2="290" y2="464" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="479" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">realm</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="486" x2="290" y2="486" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="501" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">actor_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="508" x2="290" y2="508" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="523" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">is_admin</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="530" x2="290" y2="530" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="545" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">is_current</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="50" y="566" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: SCD2 - user version</text>
+</g>
+<g>
+<rect x="40" y="600" width="250" height="118" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<rect x="40" y="600" width="250" height="30" rx="6" fill="#059669"/>
+<rect x="40" y="622" width="250" height="8" fill="#059669"/>
+<text x="50" y="620" font-family="Menlo,monospace" font-size="14" font-weight="700" fill="#fff">dim_package</text>
+<text x="50" y="645" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="700">package_sk</tspan><tspan fill="#6b7280" font-size="10">  [PK]</tspan></text>
+<line x1="40" y1="652" x2="290" y2="652" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="667" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">package_name</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="674" x2="290" y2="674" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="689" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">package_type</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<line x1="40" y1="696" x2="290" y2="696" stroke="#059669" stroke-opacity="0.12"/>
+<text x="50" y="711" font-family="Menlo,monospace" font-size="12" fill="#1f2937"><tspan font-weight="400">repo_key</tspan><tspan fill="#6b7280" font-size="10"></tspan></text>
+<text x="50" y="732" font-family="Helvetica,Arial" font-size="10" font-style="italic" fill="#6b7280">grain: SCD1</text>
+</g>
+</svg>

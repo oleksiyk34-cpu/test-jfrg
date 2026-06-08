@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: fct_download_events
+    description: >
+      Primary consumption fact. One row per artifact download event, sourced from
+      Snowplow 'artifact_download' events. Wide and flat: repo/package/actor
+      attributes are denormalized on, surrogate keys kept for extra joins.
+    config:
+      materialized: incremental
+      dist: repository_sk
+      sort: [download_date, repository_sk]
+    columns:
+
+      - name: download_event_id
+        description: "Grain key. One row per download event (from Snowplow event_id)."
+        tests:
+          - unique
+          - not_null
+
+      - name: download_date
+        description: "Event date (UTC), from derived_tstamp. Leads the sort key."
+        tests:
+          - not_null
+
+      - name: downloaded_at
+        description: "Event timestamp (derived_tstamp)."
+        tests:
+          - not_null
+
+      - name: repository_sk
+        description: "FK to dim_repository (version valid at event time)."
+        tests:
+          - relationships:
+              to: ref('dim_repository')
+              field: repository_sk
+
+      - name: user_sk
+        description: "FK to dim_user (version valid at event time)."
+        tests:
+          - relationships:
+              to: ref('dim_user')
+              field: user_sk
+
+      - name: package_sk
+        description: "FK to dim_package."
+        tests:
+          - relationships:
+              to: ref('dim_package')
+              field: package_sk
+
+      - name: repo_key
+        description: "Denormalized repository natural key."
+        tests:
+          - not_null
+
+      - name: package_type
+        description: "Denormalized ecosystem: docker, npm, maven, pypi, helm, generic."
+
+      - name: actor_type
+        description: "Denormalized identity class: human, ci_bot, service, unknown."
+        tests:
+          - accepted_values:
+              values: ['human', 'ci_bot', 'service', 'unknown']
+
+      - name: source_app
+        description: "Surface the download came from."
+        tests:
+          - accepted_values:
+              values: ['ui', 'cli', 'api', 'other']
+
+      - name: bytes_sent
+        description: "Bytes transferred by this download (traffic measure)."
+
+      - name: response_status
+        description: "HTTP status of the download."
+
+      - name: is_success
+        description: "True when response_status is 2xx."

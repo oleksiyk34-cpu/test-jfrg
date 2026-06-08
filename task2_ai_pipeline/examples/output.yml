@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: agg_repository_downloads_daily
+    description: >
+      Daily download activity per repository, split by actor type
+      (human vs CI bot). One row per repository per day per actor_type.
+    columns:
+      - name: repository_sk
+        description: FK to dim_repository.
+        tests: [not_null]
+      - name: download_date
+        description: Activity date (UTC).
+        tests: [not_null]
+      - name: actor_type
+        description: human | ci_bot | service | unknown.
+        tests:
+          - not_null
+      - name: download_count
+        description: Number of downloads in the day.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [repository_sk, download_date, actor_type]

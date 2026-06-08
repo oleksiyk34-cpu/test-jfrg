@@ -1,0 +1,179 @@
+# =============================================================================
+# raw_schema.yml
+# -----------------------------------------------------------------------------
+# Hypothetical RAW source schema for the JFrog Artifactory analytics domain.
+#
+# This file has TWO jobs:
+#   1. Documentation for the Task 1 Gold data model (what we build FROM).
+#   2. Machine-readable context injected into the Task 2 modeling agent so it
+#      only references columns that actually exist (hallucination guard).
+#
+# Source systems (per the assignment data stack):
+#   - Airbyte    -> replicates Artifactory operational data => DIMENSIONS
+#   - Snowplow   -> behavioral event stream                 => FACTS (core)
+#   - Fullstory  -> session-level UI analytics              => UX facts (secondary)
+#
+# There is NO Silver layer. These raw tables are the only input to Gold.
+# All names/columns are hypothetical; assumptions are stated in assumptions.md.
+# Redshift note: JSON payloads are modeled as the SUPER type and queried with
+# PartiQL / JSON_EXTRACT_PATH_TEXT.
+# =============================================================================
+
+version: 1
+
+databases:
+  warehouse: redshift
+
+sources:
+
+  # ---------------------------------------------------------------------------
+  # 1. AIRBYTE -> Artifactory operational data (the dimensional backbone)
+  #    Grain: current state. Airbyte replaces rows on each sync, so these are
+  #    effectively snapshots of "what the entity looks like right now".
+  # ---------------------------------------------------------------------------
+  - name: raw_artifactory
+    loader: airbyte
+    description: Operational Artifactory entities replicated by Airbyte.
+    tables:
+
+      - name: raw_artifactory__repositories
+        description: One row per repository. The catalog of storage locations.
+        grain: one row per repo_key (current state)
+        primary_key: repo_key
+        columns:
+          - {name: repo_key,        type: varchar(255), description: "Unique repository key, e.g. 'docker-local'. Natural key."}
+          - {name: package_type,    type: varchar(50),  description: "Package ecosystem: docker | npm | maven | pypi | helm | generic."}
+          - {name: rclass,          type: varchar(20),  description: "Repository mode: local | remote | virtual."}
+          - {name: description,     type: varchar(1000),description: "Free-text repo description."}
+          - {name: created_at,      type: timestamp,    description: "When the repository was created."}
+          - {name: created_by,      type: varchar(255), description: "User who created the repo (FK -> raw_artifactory__users.user_name)."}
+          - {name: _airbyte_emitted_at, type: timestamp, description: "Airbyte load timestamp (freshness/lineage)."}
+
+      - name: raw_artifactory__users
+        description: One row per identity (human user OR service/CI account).
+        grain: one row per user_name (current state)
+        primary_key: user_name
+        columns:
+          - {name: user_name,       type: varchar(255), description: "Unique identity name. Natural key."}
+          - {name: email,           type: varchar(255), description: "Email; often null/service-style for bots."}
+          - {name: realm,           type: varchar(50),  description: "Auth realm: internal | ldap | saml | oauth | api_key."}
+          - {name: is_admin,        type: boolean,      description: "Whether the identity has admin privileges."}
+          - {name: created_at,      type: timestamp,    description: "When the account was created."}
+          - {name: last_login_at,   type: timestamp,    description: "Most recent interactive login (may be null for bots)."}
+          - {name: _airbyte_emitted_at, type: timestamp, description: "Airbyte load timestamp."}
+        notes: >
+          RAW has NO human-vs-bot flag. We DERIVE actor_type in the dim using
+          name/realm/email heuristics (see assumptions.md).
+
+      - name: raw_artifactory__items
+        description: >
+          One row per stored artifact/file ("node" in Artifactory). The
+          authoritative source for storage size and physical artifact metadata.
+        grain: one row per item_id (current state)
+        primary_key: item_id
+        columns:
+          - {name: item_id,         type: bigint,       description: "Surrogate node id from Artifactory."}
+          - {name: repo_key,        type: varchar(255), description: "FK -> raw_artifactory__repositories.repo_key."}
+          - {name: artifact_path,   type: varchar(2000),description: "Full path within the repo, e.g. 'my-service/2.1.0/my-service-2.1.0.jar'."}
+          - {name: artifact_name,   type: varchar(1000),description: "File/leaf name."}
+          - {name: package_name,    type: varchar(500), description: "Logical package name parsed from path, e.g. 'my-service'."}
+          - {name: package_version, type: varchar(100), description: "Version parsed from path, e.g. '2.1.0'."}
+          - {name: size_bytes,      type: bigint,       description: "Artifact size in bytes (storage signal)."}
+          - {name: sha256,          type: varchar(64),  description: "Content checksum; identifies a unique artifact."}
+          - {name: created_at,      type: timestamp,    description: "When the artifact was first deployed."}
+          - {name: modified_at,     type: timestamp,    description: "Last modification timestamp."}
+          - {name: created_by,      type: varchar(255), description: "Identity that deployed it (FK -> users.user_name)."}
+          - {name: _airbyte_emitted_at, type: timestamp, description: "Airbyte load timestamp."}
+
+  # ---------------------------------------------------------------------------
+  # 2. SNOWPLOW -> behavioral event stream (the FACT backbone)
+  #    One row per tracked action across UI, CLI and API. Custom payloads live
+  #    in the SUPER 'unstruct_event' column (assumption: one event per action).
+  # ---------------------------------------------------------------------------
+  - name: raw_snowplow
+    loader: snowplow
+    description: Atomic behavioral events from the Artifactory UI, CLI and API.
+    tables:
+
+      - name: raw_snowplow__events
+        description: >
+          One row per behavioral event. event_name discriminates the action
+          (artifact_download, artifact_deploy, search, login, ...). Artifact-
+          specific fields are nested in the SUPER unstruct_event payload.
+        grain: one row per event_id
+        primary_key: event_id
+        columns:
+          - {name: event_id,        type: varchar(36),  description: "Unique Snowplow event UUID."}
+          - {name: collector_tstamp,type: timestamp,    description: "When the collector received the event (load/ordering)."}
+          - {name: derived_tstamp,  type: timestamp,    description: "Best-estimate true event time. Use this for analytics."}
+          - {name: event_name,      type: varchar(100), description: "Self-describing event type: artifact_download | artifact_deploy | search | login | repo_create."}
+          - {name: app_id,          type: varchar(50),  description: "Origin surface: artifactory_ui | artifactory_cli | artifactory_api."}
+          - {name: platform,        type: varchar(20),  description: "Snowplow platform, e.g. 'srv' or 'web'."}
+          - {name: user_id,         type: varchar(255), description: "Authenticated identity (FK -> users.user_name). Null for anonymous."}
+          - {name: domain_userid,   type: varchar(128), description: "Cookie/device id (UI sessions)."}
+          - {name: domain_sessionid,type: varchar(128), description: "Session id (UI sessions)."}
+          - {name: useragent,       type: varchar(1000),description: "Raw user agent string (used to refine bot detection)."}
+          - {name: os_family,       type: varchar(50),  description: "Derived OS family."}
+          - {name: unstruct_event,  type: super,        description: "JSON payload with event-specific fields (see payload_schemas below)."}
+          - {name: contexts,        type: super,        description: "JSON array of attached Snowplow contexts."}
+        payload_schemas:
+          artifact_download:
+            description: Fields present in unstruct_event when event_name='artifact_download'.
+            fields:
+              - {path: "unstruct_event.artifact_path",   type: varchar, description: "Path of the downloaded artifact."}
+              - {path: "unstruct_event.repo_key",        type: varchar, description: "Repository the pull came from."}
+              - {path: "unstruct_event.package_type",    type: varchar, description: "Ecosystem of the artifact."}
+              - {path: "unstruct_event.package_name",    type: varchar, description: "Logical package name."}
+              - {path: "unstruct_event.package_version", type: varchar, description: "Version pulled."}
+              - {path: "unstruct_event.size_bytes",      type: bigint,  description: "Bytes transferred."}
+              - {path: "unstruct_event.response_status", type: int,     description: "HTTP status (200 = success, 404, etc.)."}
+          artifact_deploy:
+            description: Fields present when event_name='artifact_deploy' (a push/upload).
+            fields:
+              - {path: "unstruct_event.artifact_path",   type: varchar, description: "Path of the deployed artifact."}
+              - {path: "unstruct_event.repo_key",        type: varchar, description: "Target repository."}
+              - {path: "unstruct_event.package_type",    type: varchar, description: "Ecosystem."}
+              - {path: "unstruct_event.package_name",    type: varchar, description: "Logical package name."}
+              - {path: "unstruct_event.package_version", type: varchar, description: "Version deployed."}
+              - {path: "unstruct_event.size_bytes",      type: bigint,  description: "Size of the new artifact."}
+              - {path: "unstruct_event.sha256",          type: varchar, description: "Checksum of the deployed artifact."}
+
+  # ---------------------------------------------------------------------------
+  # 3. FULLSTORY -> session-level UI analytics (SECONDARY / UX only)
+  #    Not about artifact consumption; about how humans use the web UI.
+  # ---------------------------------------------------------------------------
+  - name: raw_fullstory
+    loader: fullstory
+    description: Session and interaction events from the Artifactory web UI.
+    tables:
+      - name: raw_fullstory__events
+        description: One row per UI interaction (click, pageview, navigation).
+        grain: one row per event_id
+        primary_key: event_id
+        columns:
+          - {name: event_id,    type: varchar(64),  description: "Unique Fullstory event id."}
+          - {name: session_id,  type: varchar(64),  description: "UI session id."}
+          - {name: user_id,     type: varchar(255), description: "Identity (FK -> users.user_name) when known."}
+          - {name: event_type,  type: varchar(50),  description: "click | pageview | navigate | custom."}
+          - {name: page_url,    type: varchar(2000),description: "URL where the interaction occurred."}
+          - {name: target_text, type: varchar(1000),description: "Text of the clicked element (for click events)."}
+          - {name: device_type, type: varchar(50),  description: "desktop | mobile | tablet."}
+          - {name: event_tstamp,type: timestamp,    description: "When the interaction happened."}
+
+  # ---------------------------------------------------------------------------
+  # 4. AIRBYTE sync metadata (technical lineage / freshness only)
+  # ---------------------------------------------------------------------------
+  - name: raw_airbyte_internal
+    loader: airbyte
+    description: Airbyte sync/configuration metadata available in Redshift.
+    tables:
+      - name: raw_airbyte__sync_log
+        description: One row per stream sync attempt. Used for freshness checks.
+        grain: one row per (connection_id, stream_name, sync_started_at)
+        columns:
+          - {name: connection_id,    type: varchar(64),  description: "Airbyte connection id."}
+          - {name: stream_name,      type: varchar(255), description: "Source stream synced."}
+          - {name: sync_started_at,  type: timestamp,    description: "Sync start time."}
+          - {name: sync_completed_at,type: timestamp,    description: "Sync completion time."}
+          - {name: records_emitted,  type: bigint,       description: "Rows emitted in the sync."}
+          - {name: status,           type: varchar(20),  description: "succeeded | failed | partial."}
