@@ -42,12 +42,13 @@ task2_ai_pipeline/
 │   └── reviewer.md       <- prompt for the review agent
 ├── context/             <- the contract, encoding Task 1 (injected into prompts)
 │   ├── raw_schema.yml         raw tables + columns
-│   ├── gold_models.yml        existing Task 1 Gold models + their columns
+│   ├── gold_models.yml        GENERATED from Task 1 dbt yaml (do not hand-edit)
 │   ├── naming_conventions.md
 │   └── redshift_constraints.md
 ├── scripts/
 │   ├── generate_model.py <- the working pipeline (generation -> review)
 │   ├── reviewer.py        <- deterministic review checks (the testable core)
+│   ├── build_context.py   <- regenerates gold_models.yml from Task 1 dbt schema
 │   └── app.py             <- intake as a tiny Flask web form
 ├── examples/
 │   ├── request.txt       <- sample analyst request (intake stub)
@@ -56,6 +57,20 @@ task2_ai_pipeline/
 └── tests/
     └── test_reviewer.py  <- unit tests for the review agent's checks
 ```
+
+## Where the context comes from (no duplication)
+
+`gold_models.yml` is **not** hand-written — `build_context.py` generates it from the
+Task 1 dbt schema files (`task1_gold_model/models/gold/*.yml`). The Gold models are
+described once, in the dbt project; Task 2's catalog is derived from them, so the
+two can never silently drift. Re-run it whenever the Task 1 models change:
+
+```bash
+python scripts/build_context.py
+```
+
+In a production setup the same script would instead read dbt's compiled
+`manifest.json` / `catalog.json` (or the warehouse `information_schema`).
 
 ## Run it
 

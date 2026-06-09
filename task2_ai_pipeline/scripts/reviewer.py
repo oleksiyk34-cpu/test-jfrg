@@ -59,7 +59,10 @@ class ConventionChecker:
         if gold_catalog_path and Path(gold_catalog_path).exists():
             cat = yaml.safe_load(Path(gold_catalog_path).read_text())
             for m in cat.get("models", []):
-                self.gold_models[m["name"]] = {c["name"] for c in m.get("columns", [])}
+                # columns may be a list of names (generated catalog) or of dicts
+                self.gold_models[m["name"]] = {
+                    (c["name"] if isinstance(c, dict) else c) for c in m.get("columns", [])
+                }
 
     # ---- individual checks -------------------------------------------------
 

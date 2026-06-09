@@ -57,6 +57,12 @@ models:
       - name: package_type
         description: "Denormalized ecosystem: docker, npm, maven, pypi, helm, generic."
 
+      - name: package_name
+        description: "Denormalized logical package name."
+
+      - name: package_version
+        description: "Denormalized package version."
+
       - name: actor_type
         description: "Denormalized identity class: human, ci_bot, service, unknown."
         tests:

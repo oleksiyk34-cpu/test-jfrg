@@ -1,0 +1,91 @@
+version: 2
+
+# dbt schema for the Gold models that are designed but not fully implemented as
+# .sql in this assignment (the assignment asked for one full SQL stub only -
+# fct_download_events). These column definitions are the SINGLE SOURCE OF TRUTH
+# for the model catalog: Task 2 generates context/gold_models.yml from this file
+# plus fct_download_events.yml (see task2_ai_pipeline/scripts/build_context.py).
+
+models:
+
+  - name: fct_deploy_events
+    description: "Production fact. One row per deploy (upload) event."
+    columns:
+      - {name: deploy_event_id, description: "Grain key."}
+      - {name: deploy_date,     description: "Event date (UTC)."}
+      - {name: deployed_at,     description: "Event timestamp."}
+      - {name: repository_sk,   description: "FK -> dim_repository."}
+      - {name: user_sk,         description: "FK -> dim_user."}
+      - {name: package_sk,      description: "FK -> dim_package."}
+      - {name: repo_key,        description: "Denormalized repo key."}
+      - {name: package_type,    description: "Denormalized ecosystem."}
+      - {name: package_version, description: "Denormalized version."}
+      - {name: actor_type,      description: "Identity class."}
+      - {name: size_bytes,      description: "Size of the new artifact."}
+      - {name: sha256,          description: "Checksum."}
+
+  - name: fct_ui_interactions
+    description: "Secondary UX fact. One row per Fullstory UI event."
+    columns:
+      - {name: ui_event_id, description: "Grain key."}
+      - {name: event_date,  description: "Event date."}
+      - {name: user_sk,     description: "FK -> dim_user."}
+      - {name: session_id,  description: "UI session id."}
+      - {name: event_type,  description: "click | pageview | navigate."}
+      - {name: page_url,    description: "URL of the interaction."}
+
+  - name: agg_repository_daily
+    description: "Daily rollup. One row per repository per day."
+    columns:
+      - {name: repository_sk,    description: "PK part / FK -> dim_repository."}
+      - {name: activity_date,    description: "PK part. Day."}
+      - {name: repo_key,         description: "Denormalized repo key."}
+      - {name: package_type,     description: "Denormalized ecosystem."}
+      - {name: download_count,   description: "Downloads that day."}
+      - {name: deploy_count,     description: "Deploys that day."}
+      - {name: bytes_downloaded, description: "Bytes pulled that day."}
+      - {name: storage_bytes,    description: "Storage snapshot that day."}
+      - {name: distinct_users,   description: "Distinct downloaders that day."}
+
+  - name: dim_repository
+    description: "One row per repository version (SCD2)."
+    columns:
+      - {name: repository_sk, description: "Surrogate PK."}
+      - {name: repo_key,      description: "Natural key."}
+      - {name: package_type,  description: "Ecosystem."}
+      - {name: rclass,        description: "local | remote | virtual."}
+      - {name: created_at,    description: "Creation time."}
+      - {name: valid_from,    description: "SCD2 validity start."}
+      - {name: valid_to,      description: "SCD2 validity end (null = current)."}
+      - {name: is_current,    description: "Current-version flag."}
+
+  - name: dim_user
+    description: "One row per user version (SCD2)."
+    columns:
+      - {name: user_sk,    description: "Surrogate PK."}
+      - {name: user_name,  description: "Natural key."}
+      - {name: email,      description: "Email."}
+      - {name: realm,      description: "Auth realm."}
+      - {name: actor_type, description: "Derived: human | ci_bot | service."}
+      - {name: is_admin,   description: "Admin flag."}
+      - {name: valid_from, description: "SCD2 validity start."}
+      - {name: valid_to,   description: "SCD2 validity end."}
+      - {name: is_current, description: "Current-version flag."}
+
+  - name: dim_package
+    description: "One row per package (SCD1)."
+    columns:
+      - {name: package_sk,    description: "Surrogate PK."}
+      - {name: package_name,  description: "Natural key."}
+      - {name: package_type,  description: "Ecosystem."}
+      - {name: repo_key,      description: "Owning repository."}
+      - {name: first_seen_at, description: "First time the package appeared."}
+
+  - name: dim_date
+    description: "Calendar. One row per day."
+    columns:
+      - {name: date_day,    description: "PK. Calendar day."}
+      - {name: year,        description: "Year."}
+      - {name: month,       description: "Month."}
+      - {name: day_of_week, description: "Day of week."}
+      - {name: is_weekend,  description: "Weekend flag."}
