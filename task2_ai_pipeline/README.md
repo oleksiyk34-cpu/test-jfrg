@@ -41,7 +41,8 @@ task2_ai_pipeline/
 │   ├── generator.md      <- prompt for the generation agent
 │   └── reviewer.md       <- prompt for the review agent
 ├── context/             <- the contract, encoding Task 1 (injected into prompts)
-│   ├── raw_schema.yml
+│   ├── raw_schema.yml         raw tables + columns
+│   ├── gold_models.yml        existing Task 1 Gold models + their columns
 │   ├── naming_conventions.md
 │   └── redshift_constraints.md
 ├── scripts/
@@ -96,15 +97,16 @@ python scripts/app.py            # web form at http://127.0.0.1:5000
 | 4. PR creator | stub - prints what it would do | end of `generate_model.py` |
 
 The generation agent calls the review agent in-process; on a FAIL it feeds the
-issues back and retries once. Eight unit tests cover the review checks
+issues back and retries once. Eleven unit tests cover the review checks
 (`tests/test_reviewer.py`).
 
 ## How we guard against garbage
 
-- **Hallucinated columns** - the reviewer parses every `unstruct_event.<field>` and
-  every `source()` table and rejects anything not in `raw_schema.yml`. This is the
-  riskiest failure for a SUPER-heavy schema, so it is checked mechanically, not
-  left to the LLM.
+- **Hallucinated columns** - the reviewer parses every `unstruct_event.<field>`,
+  every `source()` table (against `raw_schema.yml`) and every `ref()` Gold model
+  and its columns (against `gold_models.yml`), rejecting anything that does not
+  exist. This is the riskiest failure for a SUPER-heavy schema, so it is checked
+  mechanically, not left to the LLM.
 - **Ambiguous requests** - the generator is told to return a `CLARIFY:` question
   instead of guessing the grain or scope; the pipeline surfaces the question and
   stops rather than producing a wrong model silently.
@@ -113,10 +115,12 @@ issues back and retries once. Eight unit tests cover the review checks
 
 ## Limitations & next steps
 
-- **Column validation is partial.** We verify SUPER payload fields and source
-  tables, but not every column in every CTE against the full lineage. Next step:
-  build a proper column-graph from `raw_schema.yml` + `ref()` targets and validate
-  all references.
+- **Column validation is good but not total.** We verify SUPER payload fields,
+  source tables, ref() Gold models and the columns pulled from simple
+  `select ... from ref(X)` blocks. We do not yet resolve columns through joins or
+  multi-level CTE chains. Next step: build a full column-graph from
+  `raw_schema.yml` + `gold_models.yml` + `ref()` targets and validate every
+  reference.
 - **The LLM reviewer is advisory.** Only the deterministic checks block a model.
   Next step: have the LLM reviewer return structured issues and merge them with the
   mechanical ones under a single policy.

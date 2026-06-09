@@ -47,7 +47,8 @@ def build_prompt(request: str) -> tuple[str, str]:
     system = (AGENTS / "generator.md").read_text()
     context = "\n\n".join(
         f"### {name}\n```\n{(CTX / name).read_text()}\n```"
-        for name in ("raw_schema.yml", "naming_conventions.md", "redshift_constraints.md")
+        for name in ("raw_schema.yml", "gold_models.yml",
+                     "naming_conventions.md", "redshift_constraints.md")
     )
     user = f"{context}\n\n### Analyst request\n{request.strip()}\n"
     return system, user
@@ -173,7 +174,7 @@ def parse_response(text: str) -> dict:
 # Stage 3: the review agent (deterministic core; LLM judgment optional).
 # --------------------------------------------------------------------------- #
 def review(name: str, sql: str, yml: str):
-    checker = ConventionChecker(CTX / "raw_schema.yml")
+    checker = ConventionChecker(CTX / "raw_schema.yml", CTX / "gold_models.yml")
     return checker.check(name, sql, yml)
 
 

@@ -40,7 +40,7 @@ class ConventionChecker:
 
     NAME_RE = re.compile(r"^(fct|dim|agg)_[a-z0-9_]+$")
 
-    def __init__(self, schema_path: str | Path):
+    def __init__(self, schema_path: str | Path, gold_catalog_path: str | Path | None = None):
         schema = yaml.safe_load(Path(schema_path).read_text())
         self.tables: set[str] = set()
         self.columns: set[str] = set()
@@ -53,6 +53,13 @@ class ConventionChecker:
                 for _, pdef in (t.get("payload_schemas") or {}).items():
                     for f in pdef.get("fields", []):
                         self.payload_fields.add(f["path"].split(".")[-1])
+
+        # Catalog of Task 1 Gold models: name -> set of column names.
+        self.gold_models: dict[str, set] = {}
+        if gold_catalog_path and Path(gold_catalog_path).exists():
+            cat = yaml.safe_load(Path(gold_catalog_path).read_text())
+            for m in cat.get("models", []):
+                self.gold_models[m["name"]] = {c["name"] for c in m.get("columns", [])}
 
     # ---- individual checks -------------------------------------------------
 
@@ -78,6 +85,69 @@ class ConventionChecker:
             if table not in self.tables:
                 issues.append(Issue("error", "real_columns",
                     f"source table '{table}' does not exist in raw_schema.yml."))
+
+    @staticmethod
+    def _split_top_commas(s):
+        """Split a SELECT list on commas that are NOT inside parentheses."""
+        out, depth, cur = [], 0, ""
+        for ch in s:
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            if ch == "," and depth == 0:
+                out.append(cur)
+                cur = ""
+            else:
+                cur += ch
+        if cur.strip():
+            out.append(cur)
+        return out
+
+    def _bare_columns(self, list_text):
+        """From a SELECT list, return the plain column identifiers we can check.
+        Skips '*', functions/expressions, and the alias after 'as'."""
+        cols = []
+        for item in self._split_top_commas(list_text):
+            item = item.strip()
+            if not item or item == "*" or "(" in item:
+                continue
+            left = re.split(r"\s+as\s+", item, flags=re.I)[0].strip()
+            if "." in left:
+                left = left.split(".")[-1]
+            if re.fullmatch(r"\w+", left):
+                cols.append(left)
+        return cols
+
+    def _check_ref_columns(self, sql, issues):
+        """Validate ref() targets and the columns pulled from them against the
+        Gold catalog. Mirrors the source() check, but for Task 1 models.
+        Column validation is applied only to simple 'select ... from ref(X)'
+        blocks with no join (multi-table blocks are skipped, not guessed)."""
+        if not self.gold_models:
+            return
+        ref_re = re.compile(r"from\s+\{\{\s*ref\(\s*['\"](\w+)['\"]\s*\)\s*\}\}", re.I)
+        for m in ref_re.finditer(sql):
+            model = m.group(1)
+            if model not in self.gold_models:
+                issues.append(Issue("error", "ref_columns",
+                    f"ref('{model}') is not a known Gold model in gold_models.yml."))
+                continue
+            pre = sql[:m.start()]
+            selects = list(re.finditer(r"\bselect\b", pre, re.I))
+            if not selects:
+                continue
+            list_text = pre[selects[-1].end():]
+            tail = sql[m.end():]
+            nxt = re.search(r"\bselect\b|\)", tail, re.I)
+            tail_seg = tail[:nxt.start()] if nxt else tail
+            if re.search(r"\bjoin\b", tail_seg, re.I):
+                continue  # multi-table block - cannot attribute columns simply
+            known = self.gold_models[model]
+            for col in self._bare_columns(list_text):
+                if col not in known:
+                    issues.append(Issue("error", "ref_columns",
+                        f"column '{col}' does not exist in model '{model}' (per gold_models.yml)."))
 
     def _check_config(self, name, sql, issues):
         if not name.startswith(("fct_", "agg_")):
@@ -120,6 +190,7 @@ class ConventionChecker:
         self._check_grain(sql, issues)
         self._check_naming(model_name, issues)
         self._check_real_columns(sql, issues)
+        self._check_ref_columns(sql, issues)
         self._check_config(model_name, sql, issues)
         self._check_references(sql, issues)
         self._check_tests(yml_text, issues)

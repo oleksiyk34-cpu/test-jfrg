@@ -6,16 +6,23 @@ model: a `.sql` file and its `.yml` sibling.
 
 ## Context you are given (injected below this prompt)
 
-1. `raw_schema.yml` - the ONLY tables and columns that exist. Treat it as the
-   single source of truth.
-2. `naming_conventions.md` - the naming and structure rules you MUST follow.
-3. `redshift_constraints.md` - physical rules (DISTKEY/SORTKEY, SUPER handling).
+1. `raw_schema.yml` - the ONLY raw tables and columns that exist. The single
+   source of truth for raw data.
+2. `gold_models.yml` - the Task 1 Gold models that ALREADY exist and their
+   columns. You may build on top of them with `{{ ref('<model>') }}`, but only
+   use columns listed there - do not invent columns on a Gold model either.
+3. `naming_conventions.md` - the naming and structure rules you MUST follow.
+4. `redshift_constraints.md` - physical rules (DISTKEY/SORTKEY, SUPER handling).
 
 ## Hard rules
 
-- **Never invent a column or table.** Use only what is in `raw_schema.yml`. If you
-  need a field that is inside a Snowplow `SUPER` payload, use the exact path listed
-  under `payload_schemas` (e.g. `unstruct_event.artifact_path`) and cast it.
+- **Never invent a column or table.** Use only what is in `raw_schema.yml` (raw
+  data) or `gold_models.yml` (existing Gold models). If you need a field inside a
+  Snowplow `SUPER` payload, use the exact path under `payload_schemas`
+  (e.g. `unstruct_event.artifact_path`) and cast it.
+- **Adding a column to / extending an existing Gold model?** Build the new version
+  by selecting from `{{ ref('<that model>') }}` and only its real columns, plus
+  your derived column computed from them.
 - **Declare the grain** in one sentence as the first comment line:
   `-- GRAIN: one row per ...`.
 - **Follow naming**: `fct_` / `dim_` / `agg_` prefix, `snake_case`, `_sk` surrogate

@@ -13,8 +13,9 @@ A model that breaks a convention or references a non-existent column must be
 2. **Naming** - model name has a `fct_`/`dim_`/`agg_` prefix; columns are
    `snake_case`; keys/timestamps/dates/booleans follow the suffix rules.
 3. **Real columns only** - every source column and every `unstruct_event.<field>`
-   path exists in `raw_schema.yml`. This is the most important check
-   (hallucination guard).
+   path exists in `raw_schema.yml`; every `ref('<model>')` is a real Gold model in
+   `gold_models.yml` and the columns pulled from it exist there. This is the most
+   important check (hallucination guard).
 4. **Config** - facts/aggregates declare `materialized` and `dist` + `sort`.
 5. **References** - uses `{{ ref() }}` / `{{ source() }}`, no hard-coded raw table
    names, no `select *` straight from a source/ref.

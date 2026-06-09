@@ -1,0 +1,120 @@
+# =============================================================================
+# gold_models.yml
+# -----------------------------------------------------------------------------
+# Catalog of the Task 1 Gold models and their columns.
+#
+# Two jobs (same pattern as raw_schema.yml):
+#   1. Tells the generation agent which Gold models already exist and what
+#      columns they expose, so a new model can build ON TOP of them via ref()
+#      without inventing columns.
+#   2. Lets the review agent validate ref() targets and the columns pulled from
+#      them - the same hallucination guard we already apply to raw sources.
+#
+# When you add or change a Task 1 model, update this file so the tool stays in
+# sync with the real Gold layer.
+# =============================================================================
+
+version: 1
+
+models:
+
+  - name: fct_download_events
+    grain: one row per download event
+    columns:
+      - {name: download_event_id, description: "Grain key."}
+      - {name: download_date,     description: "Event date (UTC)."}
+      - {name: downloaded_at,     description: "Event timestamp."}
+      - {name: repository_sk,     description: "FK -> dim_repository."}
+      - {name: user_sk,           description: "FK -> dim_user."}
+      - {name: package_sk,        description: "FK -> dim_package."}
+      - {name: repo_key,          description: "Denormalized repo key."}
+      - {name: package_type,      description: "Denormalized ecosystem."}
+      - {name: package_name,      description: "Denormalized package name."}
+      - {name: package_version,   description: "Denormalized version."}
+      - {name: actor_type,        description: "human | ci_bot | service | unknown."}
+      - {name: source_app,        description: "ui | cli | api | other."}
+      - {name: bytes_sent,        description: "Bytes transferred (traffic)."}
+      - {name: response_status,   description: "HTTP status."}
+      - {name: is_success,        description: "True if status is 2xx."}
+
+  - name: fct_deploy_events
+    grain: one row per deploy (upload) event
+    columns:
+      - {name: deploy_event_id,   description: "Grain key."}
+      - {name: deploy_date,       description: "Event date (UTC)."}
+      - {name: deployed_at,       description: "Event timestamp."}
+      - {name: repository_sk,     description: "FK -> dim_repository."}
+      - {name: user_sk,           description: "FK -> dim_user."}
+      - {name: package_sk,        description: "FK -> dim_package."}
+      - {name: repo_key,          description: "Denormalized repo key."}
+      - {name: package_type,      description: "Denormalized ecosystem."}
+      - {name: package_version,   description: "Denormalized version."}
+      - {name: actor_type,        description: "Identity class."}
+      - {name: size_bytes,        description: "Size of the new artifact."}
+      - {name: sha256,            description: "Checksum."}
+
+  - name: fct_ui_interactions
+    grain: one row per Fullstory UI event
+    columns:
+      - {name: ui_event_id,  description: "Grain key."}
+      - {name: event_date,   description: "Event date."}
+      - {name: user_sk,      description: "FK -> dim_user."}
+      - {name: session_id,   description: "UI session id."}
+      - {name: event_type,   description: "click | pageview | navigate."}
+      - {name: page_url,     description: "URL of the interaction."}
+
+  - name: agg_repository_daily
+    grain: one row per repository per day
+    columns:
+      - {name: repository_sk,    description: "PK part / FK -> dim_repository."}
+      - {name: activity_date,    description: "PK part. Day."}
+      - {name: repo_key,         description: "Denormalized repo key."}
+      - {name: package_type,     description: "Denormalized ecosystem."}
+      - {name: download_count,   description: "Downloads that day."}
+      - {name: deploy_count,     description: "Deploys that day."}
+      - {name: bytes_downloaded, description: "Bytes pulled that day."}
+      - {name: storage_bytes,    description: "Storage snapshot that day."}
+      - {name: distinct_users,   description: "Distinct downloaders that day."}
+
+  - name: dim_repository
+    grain: one row per repository version (SCD2)
+    columns:
+      - {name: repository_sk, description: "Surrogate PK."}
+      - {name: repo_key,      description: "Natural key."}
+      - {name: package_type,  description: "Ecosystem."}
+      - {name: rclass,        description: "local | remote | virtual."}
+      - {name: created_at,    description: "Creation time."}
+      - {name: valid_from,    description: "SCD2 validity start."}
+      - {name: valid_to,      description: "SCD2 validity end (null = current)."}
+      - {name: is_current,    description: "True for the current version."}
+
+  - name: dim_user
+    grain: one row per user version (SCD2)
+    columns:
+      - {name: user_sk,     description: "Surrogate PK."}
+      - {name: user_name,   description: "Natural key."}
+      - {name: email,       description: "Email."}
+      - {name: realm,       description: "Auth realm."}
+      - {name: actor_type,  description: "Derived: human | ci_bot | service."}
+      - {name: is_admin,    description: "Admin flag."}
+      - {name: valid_from,  description: "SCD2 validity start."}
+      - {name: valid_to,    description: "SCD2 validity end."}
+      - {name: is_current,  description: "Current-version flag."}
+
+  - name: dim_package
+    grain: one row per package (SCD1)
+    columns:
+      - {name: package_sk,    description: "Surrogate PK."}
+      - {name: package_name,  description: "Natural key."}
+      - {name: package_type,  description: "Ecosystem."}
+      - {name: repo_key,      description: "Owning repository."}
+      - {name: first_seen_at, description: "First time the package appeared."}
+
+  - name: dim_date
+    grain: one row per day
+    columns:
+      - {name: date_day,    description: "PK. Calendar day."}
+      - {name: year,        description: "Year."}
+      - {name: month,       description: "Month."}
+      - {name: day_of_week, description: "Day of week."}
+      - {name: is_weekend,  description: "Weekend flag."}
